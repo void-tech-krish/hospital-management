@@ -54,6 +54,27 @@ h6 {
   color: var(--text-dark);
 }
 
+.homepage-wrapper {
+  background: url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  position: relative;
+}
+
+.homepage-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(240, 248, 255, 0.6);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.homepage-wrapper > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Auth Styles */
 .auth-container {
   display: flex;
