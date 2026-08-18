@@ -8,7 +8,7 @@ import DoctorDashboard from './components/DoctorDashboard';
 import StaffDashboard from './components/StaffDashboard';
 import HomePage from './components/HomePage';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || null);

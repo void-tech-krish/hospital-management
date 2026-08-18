@@ -39,7 +39,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
         name: profileName, password: profilePassword,
         gender, contact, specialization, experience, bio, notifications, signature
       };
-      const res = await axios.put('http://localhost:5000/api/users/profile', payload, { headers: { Authorization: `Bearer ${tokenLocal}` } });
+      const res = await axios.put('/api/users/profile', payload, { headers: { Authorization: `Bearer ${tokenLocal}` } });
       localStorage.setItem('user', JSON.stringify(res.data.user));
       alert('Profile updated successfully! Refreshing to apply changes...');
       window.location.reload();
@@ -54,7 +54,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
 
   const updateAvailability = async () => {
     try {
-      await axios.put('http://localhost:5000/api/doctors/availability', { availability }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put('/api/doctors/availability', { availability }, { headers: { Authorization: `Bearer ${token}` } });
       alert('Availability updated successfully!');
     } catch (err) {
       alert('Error updating availability');
@@ -65,7 +65,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   
   const fetchBedRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
       setBedRequests(res.data);
     } catch(err) {}
   };
@@ -76,7 +76,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
 
   const updateBedRequestStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/bed-requests/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/bed-requests/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
       fetchBedRequests();
     } catch(err) {
       alert('Error updating status');
@@ -282,7 +282,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                             const pName = patient ? patient.name : 'Unknown';
 
                             try {
-                              await axios.post('http://localhost:5000/api/bed-requests', { bedType: assignedBed, patientId: selectedPatientId, patientName: pName }, { headers: { Authorization: `Bearer ${token}` } });
+                              await axios.post('/api/bed-requests', { bedType: assignedBed, patientId: selectedPatientId, patientName: pName }, { headers: { Authorization: `Bearer ${token}` } });
                               alert(`Patient admitted and ${assignedBed} assigned successfully!`); 
                               setAssignedBed(''); 
                             } catch(err) {

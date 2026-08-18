@@ -36,7 +36,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
   const fetchBills = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/bills', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/bills', { headers: { Authorization: `Bearer ${token}` } });
       setBills(res.data);
     } catch(err) {}
   };
@@ -44,7 +44,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/messages', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/messages', { headers: { Authorization: `Bearer ${token}` } });
       setMessages(res.data);
     } catch(err) {}
   };
@@ -52,7 +52,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
   const fetchBedRequests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
       setBedRequests(res.data);
     } catch(err) {}
   };
@@ -67,7 +67,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put('http://localhost:5000/api/users/profile', 
+      const res = await axios.put('/api/users/profile', 
         { name: profileName, password: profilePassword, insuranceProvider, insuranceId }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -81,7 +81,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     e.preventDefault();
     try {
         const token = localStorage.getItem('token');
-        const res = await axios.post('http://localhost:5000/api/users/dependents', { name: dependentName, age: dependentAge, relation: dependentRelation }, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.post('/api/users/dependents', { name: dependentName, age: dependentAge, relation: dependentRelation }, { headers: { Authorization: `Bearer ${token}` } });
         localStorage.setItem('user', JSON.stringify(res.data.user));
         alert('Dependent added successfully! You can now manage their healthcare.');
         setDependentName(''); setDependentAge(''); setDependentRelation('');
@@ -93,7 +93,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
     try {
         const token = localStorage.getItem('token');
-        await axios.put(`http://localhost:5000/api/appointments/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.put(`/api/appointments/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } });
         alert('Appointment cancelled.');
         window.location.reload(); 
     } catch(e) { alert('Error cancelling'); }
@@ -104,7 +104,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     if (!newDate) return;
     try {
         const token = localStorage.getItem('token');
-        await axios.put(`http://localhost:5000/api/appointments/${id}/reschedule`, { date: newDate }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.put(`/api/appointments/${id}/reschedule`, { date: newDate }, { headers: { Authorization: `Bearer ${token}` } });
         alert('Appointment rescheduled.');
         window.location.reload();
     } catch(e) { alert('Error rescheduling'); }
@@ -135,7 +135,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     if (!newMessage || !messageDoctor) return;
     try {
         const token = localStorage.getItem('token');
-        await axios.post('http://localhost:5000/api/messages', { receiverId: messageDoctor, text: newMessage }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post('/api/messages', { receiverId: messageDoctor, text: newMessage }, { headers: { Authorization: `Bearer ${token}` } });
         setNewMessage('');
         fetchMessages();
         
@@ -143,7 +143,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
         const hour = new Date().getHours();
         if (hour < 9 || hour > 17) {
             setTimeout(() => {
-                 axios.post('http://localhost:5000/api/messages', { receiverId: user._id, text: "AUTO-REPLY: The doctor is currently out of office (Hours: 9 AM - 5 PM). Your message will be reviewed on the next business day. If this is an emergency, please contact the Emergency Desk." }, { headers: { Authorization: `Bearer ${token}` } }).then(fetchMessages);
+                 axios.post('/api/messages', { receiverId: user._id, text: "AUTO-REPLY: The doctor is currently out of office (Hours: 9 AM - 5 PM). Your message will be reviewed on the next business day. If this is an emergency, please contact the Emergency Desk." }, { headers: { Authorization: `Bearer ${token}` } }).then(fetchMessages);
             }, 1000);
         }
     } catch(e) { alert('Error sending message'); }
@@ -167,7 +167,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     }
     try {
         const token = localStorage.getItem('token');
-        await axios.post('http://localhost:5000/api/bed-requests', { bedType: patientBedType }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post('/api/bed-requests', { bedType: patientBedType }, { headers: { Authorization: `Bearer ${token}` } });
         alert('Bed request submitted successfully! Hospital admin will confirm your reservation shortly.');
         setPatientBedType('');
         fetchBedRequests();

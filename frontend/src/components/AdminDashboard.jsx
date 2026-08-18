@@ -29,7 +29,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/users', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } });
       setUsersList(res.data);
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -38,7 +38,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
   const fetchSalaries = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/salaries', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/salaries', { headers: { Authorization: `Bearer ${token}` } });
       setSalaryHistory(res.data);
     } catch (err) {
       console.error('Error fetching salaries:', err);
@@ -47,35 +47,35 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/departments', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/departments', { headers: { Authorization: `Bearer ${token}` } });
       setDepartments(res.data);
     } catch (err) {}
   };
 
   const fetchGrievances = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/grievances', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/grievances', { headers: { Authorization: `Bearer ${token}` } });
       setGrievances(res.data);
     } catch (err) {}
   };
 
   const fetchExpenses = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/expenses', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/expenses', { headers: { Authorization: `Bearer ${token}` } });
       setExpenses(res.data);
     } catch (err) {}
   };
 
   const fetchAuditLogs = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/audit', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/admin/audit', { headers: { Authorization: `Bearer ${token}` } });
       setAuditLogs(res.data);
     } catch (err) {}
   };
 
   const fetchBedRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get('/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
       setBedRequests(res.data);
     } catch(err) {}
   };
@@ -95,7 +95,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Are you sure you want to remove this user?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`/api/admin/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       alert('User removed successfully!');
       fetchUsers();
     } catch (err) {
@@ -105,7 +105,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
   const handleApproveUser = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/users/${id}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/users/${id}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
       alert('User approved successfully!');
       fetchUsers();
     } catch (err) {
@@ -116,7 +116,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const handleRejectUser = async (id) => {
     if (!window.confirm('Are you sure you want to reject this user?')) return;
     try {
-      await axios.put(`http://localhost:5000/api/admin/users/${id}/reject`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/users/${id}/reject`, {}, { headers: { Authorization: `Bearer ${token}` } });
       alert('User rejected successfully!');
       fetchUsers();
     } catch (err) {
@@ -128,7 +128,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     const newAvail = prompt('Enter new availability for doctor:');
     if (newAvail === null) return;
     try {
-      await axios.put(`http://localhost:5000/api/admin/users/${id}/availability`, { availability: newAvail }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/users/${id}/availability`, { availability: newAvail }, { headers: { Authorization: `Bearer ${token}` } });
       alert('Availability updated!');
       fetchUsers();
     } catch (err) {
@@ -143,7 +143,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
         { description: 'Minimal Charge', cost: minimalCharge },
         { description: `Diagnosis: ${diagnosis}`, cost: Number(diagnosisCharge) }
       ];
-      await axios.post('http://localhost:5000/api/admin/bills', { patientId, items }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/admin/bills', { patientId, items }, { headers: { Authorization: `Bearer ${token}` } });
       alert('Bill generated successfully!');
       fetchAdminBills();
       setDiagnosis('');
@@ -161,7 +161,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     if (!month) return;
 
     try {
-      await axios.post('http://localhost:5000/api/admin/salaries', { userId, amount: Number(amount), month }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/admin/salaries', { userId, amount: Number(amount), month }, { headers: { Authorization: `Bearer ${token}` } });
       alert('Salary paid successfully!');
       fetchSalaries();
     } catch (err) {
@@ -172,7 +172,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const handleAddDepartment = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/admin/departments', { name: newDeptName, hodName: newDeptHod }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/admin/departments', { name: newDeptName, hodName: newDeptHod }, { headers: { Authorization: `Bearer ${token}` } });
       alert('Department created');
       setNewDeptName('');
       setNewDeptHod('');
@@ -183,7 +183,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const handleUpdateHod = async (deptId, hodName) => {
     if (!hodName) return;
     try {
-      await axios.put(`http://localhost:5000/api/admin/departments/${deptId}/hod`, { hodName }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/departments/${deptId}/hod`, { hodName }, { headers: { Authorization: `Bearer ${token}` } });
       alert('HOD updated successfully!');
       fetchDepartments();
     } catch (err) { alert('Error updating HOD'); }
@@ -193,14 +193,14 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     const staffName = prompt('Enter staff name to assign:');
     if(!staffName) return;
     try {
-      await axios.put(`http://localhost:5000/api/admin/grievances/${id}/assign`, { staffName }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/grievances/${id}/assign`, { staffName }, { headers: { Authorization: `Bearer ${token}` } });
       fetchGrievances();
     } catch(err) { alert('Error'); }
   };
 
   const handleResolveGrievance = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/grievances/${id}/resolve`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/admin/grievances/${id}/resolve`, {}, { headers: { Authorization: `Bearer ${token}` } });
       fetchGrievances();
     } catch(err) { alert('Error'); }
   };
@@ -208,7 +208,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/admin/expenses', { description: expenseDesc, amount: expenseAmount }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/admin/expenses', { description: expenseDesc, amount: expenseAmount }, { headers: { Authorization: `Bearer ${token}` } });
       setExpenseDesc('');
       setExpenseAmount('');
       fetchExpenses();
@@ -217,7 +217,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
   const updateBedRequestStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/bed-requests/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/bed-requests/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
       fetchBedRequests();
     } catch(err) {
       alert('Error updating status');
@@ -552,7 +552,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                    const pid = e.target.pid.value;
                    const btype = e.target.btype.value;
                    try {
-                     await axios.post('http://localhost:5000/api/bed-requests', { bedType: btype, patientId: pid, patientName: pid }, { headers: { Authorization: `Bearer ${token}` } });
+                     await axios.post('/api/bed-requests', { bedType: btype, patientId: pid, patientName: pid }, { headers: { Authorization: `Bearer ${token}` } });
                      alert('Bed assigned successfully!');
                      fetchBedRequests();
                      e.target.reset();
