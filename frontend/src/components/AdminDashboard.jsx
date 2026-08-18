@@ -25,6 +25,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const [selectedViewDept, setSelectedViewDept] = useState('All');
 
   const [bedRequests, setBedRequests] = useState([]);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
 
   const minimalCharge = 50; // Minimal fixed charge
 
@@ -281,36 +282,67 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
 
           {activeTab === 'Users' && (
              <div>
-               <div className="header-row">
+               <div className="header-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                    <h2>User Management</h2>
+                   <input 
+                     type="text" 
+                     placeholder="Search by name..." 
+                     value={userSearchTerm}
+                     onChange={(e) => setUserSearchTerm(e.target.value)}
+                     style={{padding: '10px', borderRadius: '5px', border: '1px solid #cbd5e1', width: '250px'}}
+                   />
                </div>
-               <div className="table-container glass-panel" style={{marginTop: '15px'}}>
-                    <table style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
-                        <thead>
-                            <tr style={{background: '#f8fafc'}}>
-                                <th style={{padding: '10px'}}>Name</th>
-                                <th style={{padding: '10px'}}>Email</th>
-                                <th style={{padding: '10px'}}>Role</th>
-                                <th style={{padding: '10px'}}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {usersList.length === 0 && <tr><td colSpan="4" style={{padding: '10px'}}>No users found.</td></tr>}
-                            {usersList.filter(u => u.status === 'Approved' || !u.status).map(u => (
-                               <tr key={u._id} style={{borderBottom: '1px solid #eee'}}>
-                                   <td style={{padding: '10px'}}>{u.name}</td>
-                                   <td style={{padding: '10px'}}>{u.email}</td>
-                                   <td style={{padding: '10px', textTransform: 'capitalize'}}>{u.role}</td>
-                                   <td style={{padding: '10px'}}>
-                                       {u.role !== 'admin' && (
-                                         <button onClick={() => handleDeleteUser(u._id)} className="btn primary-btn" style={{padding: '5px 10px', background: '#ef4444'}}>Remove</button>
-                                       )}
-                                   </td>
-                               </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+               
+               {['doctor', 'patient', 'staff', 'admin'].map(role => {
+                 const filteredUsers = usersList.filter(u => 
+                   (u.status === 'Approved' || !u.status) && 
+                   u.role === role &&
+                   (u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) || 
+                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                 );
+
+                 if (filteredUsers.length === 0) return null;
+
+                 return (
+                   <div key={role} className="table-container glass-panel" style={{marginTop: '20px'}}>
+                        <h3 style={{textTransform: 'capitalize', marginBottom: '10px', color: '#334155'}}>{role}s</h3>
+                        <table style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
+                            <thead>
+                                <tr style={{background: '#f8fafc'}}>
+                                    <th style={{padding: '10px'}}>Name</th>
+                                    <th style={{padding: '10px'}}>Email</th>
+                                    <th style={{padding: '10px'}}>Role</th>
+                                    <th style={{padding: '10px'}}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredUsers.map(u => (
+                                   <tr key={u._id} style={{borderBottom: '1px solid #eee'}}>
+                                       <td style={{padding: '10px'}}>{u.role === 'doctor' && !u.name.startsWith('Dr.') ? `Dr. ${u.name}` : u.name}</td>
+                                       <td style={{padding: '10px'}}>{u.email}</td>
+                                       <td style={{padding: '10px', textTransform: 'capitalize'}}>{u.role}</td>
+                                       <td style={{padding: '10px'}}>
+                                           {u.role !== 'admin' && (
+                                             <button onClick={() => handleDeleteUser(u._id)} className="btn primary-btn" style={{padding: '5px 10px', background: '#ef4444'}}>Remove</button>
+                                           )}
+                                       </td>
+                                   </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                 );
+               })}
+               
+               {usersList.filter(u => 
+                   (u.status === 'Approved' || !u.status) && 
+                   (u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) || 
+                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                 ).length === 0 && (
+                   <div className="glass-panel card" style={{marginTop: '20px'}}>
+                     <p>No users found matching your search.</p>
+                   </div>
+               )}
              </div>
           )}
 
