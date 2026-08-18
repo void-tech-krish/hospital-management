@@ -411,7 +411,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                             {usersList.filter(u => u.role === 'doctor').length === 0 && <tr><td colSpan="4" style={{padding: '10px'}}>No doctors found.</td></tr>}
                             {usersList.filter(u => u.role === 'doctor').map(u => (
                                <tr key={u._id} style={{borderBottom: '1px solid #eee'}}>
-                                   <td style={{padding: '10px'}}>Dr. {u.name}</td>
+                                   <td style={{padding: '10px'}}>{u.role === 'doctor' && !u.name.startsWith('Dr.') ? `Dr. ${u.name}` : u.name}</td>
                                    <td style={{padding: '10px'}}>{u.email}</td>
                                    <td style={{padding: '10px'}}>
                                       <span style={{fontWeight: '500', color: u.availability ? '#0f172a' : '#64748b'}}>
@@ -451,7 +451,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                       {appointments.map(a => (
                         <tr key={a._id} style={{borderBottom: '1px solid #e2e8f0'}}>
                            <td style={{padding: '10px'}}>{a.patientId?.name || 'Unknown'}</td>
-                           <td style={{padding: '10px'}}>Dr. {a.doctorId?.name || 'Unknown'}</td>
+                           <td style={{padding: '10px'}}>{a.doctorId?.name?.startsWith('Dr.') ? a.doctorId?.name : `Dr. ${a.doctorId?.name || 'Unknown'}`}</td>
                            <td style={{padding: '10px'}}>{new Date(a.date).toLocaleDateString()}</td>
                            <td style={{padding: '10px'}}><strong>{a.status}</strong></td>
                         </tr>
@@ -735,7 +735,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                        <select value={newDeptHod} onChange={e => setNewDeptHod(e.target.value)} required style={{padding: '10px', borderRadius: '5px', flex: 1}}>
                            <option value="" disabled>Select Head of Department</option>
                            {usersList.filter(u => u.role === 'doctor').map(d => (
-                               <option key={d._id} value={d.name}>Dr. {d.name}</option>
+                               <option key={d._id} value={d.name}>{d.name.startsWith('Dr.') ? d.name : `Dr. ${d.name}`}</option>
                            ))}
                        </select>
                        <button type="submit" className="btn primary-btn" style={{padding: '10px'}}>Create</button>
