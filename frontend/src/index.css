@@ -29,23 +29,19 @@ html {
 }
 
 body {
-  background: url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
-  background-attachment: fixed;
+  background: linear-gradient(-45deg, #f0f4f8, #e0e7ff, #f3e8ff, #f8fafc);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
   color: var(--text-dark);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.6;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(240, 248, 255, 0.6);
-  /* Soft, slightly blue tint */
-  backdrop-filter: none;
-  z-index: -1;
-  pointer-events: none;
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 h1,
@@ -195,17 +191,15 @@ h6 {
 
 .sidebar {
   width: 280px;
-  background: linear-gradient(rgba(239, 246, 255, 0.8), rgba(219, 234, 254, 0.8)), 
-              url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat !important;
-  backdrop-filter: blur(4px);
-  border-right: 1px solid var(--glass-border);
+  background: #0f172a; /* Deep Slate */
+  border-right: 1px solid rgba(255,255,255,0.05);
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
 }
 
@@ -223,7 +217,7 @@ h6 {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 40px;
-  color: var(--primary-dark);
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -240,7 +234,7 @@ h6 {
   border-radius: 12px;
   cursor: pointer;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #94a3b8;
   transition: var(--transition);
   display: flex;
   align-items: center;
@@ -248,8 +242,8 @@ h6 {
 }
 
 .sidebar li:hover {
-  background: rgba(59, 130, 246, 0.05);
-  color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   transform: translateX(5px);
 }
 
