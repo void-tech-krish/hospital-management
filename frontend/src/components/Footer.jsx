@@ -24,8 +24,8 @@ const Footer = ({ id, onDoctorClick, onLoginClick, onDashboardClick }) => {
         <div className="footer-column">
           <h4>MediVerse</h4>
           <p>456 Wellness Blvd, Health City<br />Metroville, ST 54321</p>
-          <p id="footer-contact"><strong>Emergency:</strong> <a href="tel:911" style={{ color: '#60a5fa' }}>911</a></p>
-          <p><strong>Main Line:</strong> <a href="tel:+15551234567" style={{ color: '#60a5fa' }}>(555) 123-4567</a></p>
+          <p id="footer-contact"><strong>Emergency:</strong> <a href="tel:+91512140058" style={{ color: '#60a5fa' }}>+91 95121 40058</a> / 0281 6195050/60</p>
+          <p><strong>Helpline:</strong> <a href="tel:+91512140059" style={{ color: '#60a5fa' }}>+91 95121 40059</a> / 0281 6195000</p>
           <p><strong>Email:</strong> <a href="mailto:enquiry@MediVersehospital.co.in" style={{ color: '#60a5fa' }}>enquiry@MediVersehospital.co.in</a></p>
         </div>
         <div className="footer-column">

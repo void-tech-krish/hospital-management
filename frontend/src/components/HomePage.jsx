@@ -408,16 +408,6 @@ const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, user
           <a href="#footer-contact" onClick={e => { e.preventDefault(); document.getElementById('footer-contact')?.scrollIntoView({ behavior: 'smooth' }); }}>Contact</a>
         </nav>
         <div className="header-right">
-          <div className="header-contact-block">
-            <span className="header-label">Emergency</span>
-            <a href="tel:+91512140058">+91 95121 40058</a>
-            <p>0281 6195050/60</p>
-          </div>
-          <div className="header-contact-block">
-            <span className="header-label">Helpline</span>
-            <a href="tel:+91512140059">+91 95121 40059</a>
-            <p>0281 6195000</p>
-          </div>
           <div className="header-buttons">
             <button className="outline-btn" onClick={onBookAppointmentClick}>Book Appointment</button>
             <button className="login-header-btn" onClick={user ? onDashboardClick : onLoginClick}>
@@ -561,7 +551,9 @@ const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, user
                 {showMoreOverview ? 'Show Less' : 'Read More'}
               </button>
             </div>
-
+            <div className="overview-image">
+              <img src="/overview_image.jpg" alt="Hospital Overview" />
+            </div>
           </div>
           <div className="overview-cards">
             {overviewFeatures.map(feature => (
