@@ -72,7 +72,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     if (activeTab === 'Billing') fetchBills();
     if (activeTab === 'Messaging') fetchMessages();
     if (activeTab === 'Beds') fetchBedRequests();
-    if (activeTab === 'Departments') fetchAdminDepartments();
+    if (activeTab === 'Departments' || activeTab === 'Appointments' || activeTab === 'Dashboard') fetchAdminDepartments();
   }, [activeTab]);
 
   const handleUpdateProfile = async (e) => {
@@ -161,9 +161,11 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     } catch(e) { alert('Error sending message'); }
   };
 
-  const departments = doctors.length > 0
-    ? [...new Set(doctors.map(d => d.department || 'General Medicine'))]
-    : [];
+  const departments = adminDepartments.length > 0
+    ? adminDepartments.map(d => d.name)
+    : (doctors.length > 0
+      ? [...new Set(doctors.map(d => d.department || 'General Medicine'))]
+      : []);
 
   const filteredDoctors = selectedDept
     ? doctors.filter(d => (d.department || 'General Medicine') === selectedDept)
