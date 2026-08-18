@@ -120,31 +120,6 @@ const bedRequestSchema = new mongoose.Schema({
 });
 const BedRequest = mongoose.model('BedRequest', bedRequestSchema);
 
-const mapNodeSchema = new mongoose.Schema({
-  nodeId: { type: String, required: true, unique: true },
-  name: { type: String, required: true },
-  floorLevel: { type: Number, required: true },
-  x_coordinate: { type: Number, required: true },
-  y_coordinate: { type: Number, required: true },
-  type: { 
-    type: String, 
-    enum: ['room', 'corridor', 'elevator', 'stair', 'entrance', 'reception', 'restroom'], 
-    required: true 
-  },
-  department: { type: String },
-  isWheelchairAccessible: { type: Boolean, default: true }
-});
-const MapNode = mongoose.model('MapNode', mapNodeSchema);
-
-const mapEdgeSchema = new mongoose.Schema({
-  sourceNode: { type: mongoose.Schema.Types.ObjectId, ref: 'MapNode', required: true },
-  targetNode: { type: mongoose.Schema.Types.ObjectId, ref: 'MapNode', required: true },
-  distanceWeight: { type: Number, required: true },
-  isWheelchairAccessible: { type: Boolean, default: true },
-  isBidirectional: { type: Boolean, default: true }
-});
-const MapEdge = mongoose.model('MapEdge', mapEdgeSchema);
-
 // --- HELPER ---
 const addLog = async (userId, action) => {
   await AuditLog.create({ userId, action });
@@ -596,139 +571,6 @@ app.put('/api/bed-requests/:id/status', verifyToken, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- INDOOR NAVIGATION ROUTES ---
-app.get('/api/navigation/nodes', async (req, res) => {
-  try {
-    const query = req.query.floor ? { floorLevel: Number(req.query.floor) } : {};
-    const nodes = await MapNode.find(query);
-    res.json(nodes);
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/navigation/nodes/search', async (req, res) => {
-  try {
-    const { q } = req.query;
-    if (!q) return res.json([]);
-    const nodes = await MapNode.find({ name: { $regex: q, $options: 'i' } });
-    res.json(nodes);
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/navigation/edges', async (req, res) => {
-  try {
-    const edges = await MapEdge.find();
-    res.json(edges);
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/navigation/route', async (req, res) => {
-  try {
-    const { startNodeId, endNodeId, wheelchairOnly } = req.body;
-    
-    // 1. Fetch all nodes and edges
-    const nodes = await MapNode.find().lean();
-    const edges = await MapEdge.find().populate('sourceNode').populate('targetNode').lean();
-    
-    // Map nodes by ID for quick lookup
-    const nodeMap = new Map(nodes.map(n => [n.nodeId, n]));
-    
-    const startNode = nodeMap.get(startNodeId);
-    const endNode = nodeMap.get(endNodeId);
-    
-    if (!startNode || !endNode) {
-      return res.status(404).json({ error: 'Start or End node not found' });
-    }
-    
-    // 2. Build Adjacency List for A* Search
-    const adjacencyList = new Map();
-    nodes.forEach(n => adjacencyList.set(n._id.toString(), []));
-    
-    edges.forEach(edge => {
-      // Filter out non-wheelchair accessible paths if requested
-      if (wheelchairOnly && !edge.isWheelchairAccessible) return;
-      
-      const srcId = edge.sourceNode._id.toString();
-      const tgtId = edge.targetNode._id.toString();
-      
-      adjacencyList.get(srcId).push({ target: tgtId, weight: edge.distanceWeight });
-      if (edge.isBidirectional) {
-        adjacencyList.get(tgtId).push({ target: srcId, weight: edge.distanceWeight });
-      }
-    });
-    
-    // 3. A* Search Algorithm
-    // Heuristic: Euclidean distance between nodes (assumes 1 unit per pixel/coordinate roughly)
-    const heuristic = (id1, id2) => {
-      const n1 = nodes.find(n => n._id.toString() === id1);
-      const n2 = nodes.find(n => n._id.toString() === id2);
-      if (!n1 || !n2) return 0;
-      // Add a large penalty for changing floors to prefer same-floor routes when possible
-      const floorPenalty = Math.abs(n1.floorLevel - n2.floorLevel) * 1000;
-      return Math.sqrt(Math.pow(n1.x_coordinate - n2.x_coordinate, 2) + Math.pow(n1.y_coordinate - n2.y_coordinate, 2)) + floorPenalty;
-    };
-
-    const openSet = new Set([startNode._id.toString()]);
-    const cameFrom = new Map();
-    
-    const gScore = new Map();
-    nodes.forEach(n => gScore.set(n._id.toString(), Infinity));
-    gScore.set(startNode._id.toString(), 0);
-    
-    const fScore = new Map();
-    nodes.forEach(n => fScore.set(n._id.toString(), Infinity));
-    fScore.set(startNode._id.toString(), heuristic(startNode._id.toString(), endNode._id.toString()));
-    
-    let currentId = null;
-    let pathFound = false;
-
-    while (openSet.size > 0) {
-      // Find node in openSet with lowest fScore
-      currentId = [...openSet].reduce((a, b) => fScore.get(a) < fScore.get(b) ? a : b);
-      
-      if (currentId === endNode._id.toString()) {
-        pathFound = true;
-        break;
-      }
-      
-      openSet.delete(currentId);
-      
-      const neighbors = adjacencyList.get(currentId) || [];
-      for (let neighbor of neighbors) {
-        const tentativeGScore = gScore.get(currentId) + neighbor.weight;
-        
-        if (tentativeGScore < gScore.get(neighbor.target)) {
-          cameFrom.set(neighbor.target, currentId);
-          gScore.set(neighbor.target, tentativeGScore);
-          fScore.set(neighbor.target, tentativeGScore + heuristic(neighbor.target, endNode._id.toString()));
-          if (!openSet.has(neighbor.target)) {
-            openSet.add(neighbor.target);
-          }
-        }
-      }
-    }
-    
-    if (!pathFound) {
-      return res.status(404).json({ error: 'No path found between these locations' });
-    }
-    
-    // 4. Reconstruct Path
-    const path = [];
-    let curr = endNode._id.toString();
-    while (cameFrom.has(curr)) {
-      path.unshift(nodes.find(n => n._id.toString() === curr));
-      curr = cameFrom.get(curr);
-    }
-    path.unshift(startNode);
-    
-    res.json({
-      path,
-      totalDistance: gScore.get(endNode._id.toString()),
-      estimatedTimeMins: Math.ceil(gScore.get(endNode._id.toString()) / 80) // rough estimate, 80 units per min
-    });
-    
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
 const seedAdmin = async () => {
   try {
     const hashedPassword = await bcrypt.hash('krishna06', 10);
@@ -786,4 +628,5 @@ const seedDepartments = async () => {
 };
 seedDepartments();
 
-app.listen(PORT, () => console.log(`Backend Server running on port ${PORT} (MongoDB Atlas connected)`));
+// app.listen(PORT, () => console.log(`Backend Server running on port ${PORT} (MongoDB Atlas connected)`));
+module.exports = app;

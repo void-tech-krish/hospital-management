@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Footer from './Footer';
 import Chatbot from './Chatbot';
 
-const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, onMapClick, user }) => {
+const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, user }) => {
   const [activeDept, setActiveDept] = useState(null);
   const [showAllDepts, setShowAllDepts] = useState(false);
   const [showMoreHeroInfo, setShowMoreHeroInfo] = useState(false);
@@ -385,7 +385,6 @@ const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, onMa
     <div className="homepage-wrapper" id="home">
       <div className="home-topbar">
         <div className="topbar-links">
-          <a href="#map" onClick={e => { e.preventDefault(); onMapClick(); }} style={{ fontWeight: 'bold', color: '#2563eb' }}>📍 Indoor Map</a>
           <a href="#footer-contact" onClick={e => { e.preventDefault(); document.getElementById('footer-contact')?.scrollIntoView({ behavior: 'smooth' }); }}>International Patients</a>
           <a href="#departments" onClick={e => { e.preventDefault(); document.getElementById('departments')?.scrollIntoView({ behavior: 'smooth' }); }}>Health CheckUp</a>
           <a href="#" onClick={e => { e.preventDefault(); user ? onDashboardClick() : onLoginClick(); }}>Patient Portal</a>
@@ -405,7 +404,6 @@ const HomePage = ({ onLoginClick, onBookAppointmentClick, onDashboardClick, onMa
         <nav className="home-nav">
           <a href="#home">Home</a>
           <a href="#departments">Departments</a>
-          <a href="#map" onClick={e => { e.preventDefault(); onMapClick(); }}>Hospital Map</a>
           <a href="#footer-address" onClick={e => { e.preventDefault(); document.getElementById('footer-address')?.scrollIntoView({ behavior: 'smooth' }); }}>Address</a>
           <a href="#footer-contact" onClick={e => { e.preventDefault(); document.getElementById('footer-contact')?.scrollIntoView({ behavior: 'smooth' }); }}>Contact</a>
         </nav>

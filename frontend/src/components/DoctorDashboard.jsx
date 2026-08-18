@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Footer from './Footer';
 
-const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goToMap, appointments, token }) => {
+const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appointments, token }) => {
   const [availability, setAvailability] = useState('');
   
   // EHR & Consultation States
@@ -112,7 +112,6 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goTo
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Bed Availability</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy Stock</li>
           <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
-          <li onClick={goToMap} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#3b82f6' }}>📍 Indoor Map</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
       </nav>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Footer from './Footer';
 
-const StaffDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goToMap, appointments }) => {
+const StaffDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appointments }) => {
   return (
     <>
     <div className="dashboard-container">
@@ -13,7 +13,6 @@ const StaffDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goToM
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Beds</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy</li>
           <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
-          <li onClick={goToMap} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#3b82f6' }}>📍 Indoor Map</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
       </nav>

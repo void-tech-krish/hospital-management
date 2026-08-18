@@ -7,7 +7,6 @@ import PatientDashboard from './components/PatientDashboard';
 import DoctorDashboard from './components/DoctorDashboard';
 import StaffDashboard from './components/StaffDashboard';
 import HomePage from './components/HomePage';
-import AIHospitalNavigator from './components/AIHospitalNavigator';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -165,21 +164,9 @@ function App() {
   }
 
   // Priority 2: Dashboards (if logged in and not explicitly on home)
-  if (view === 'map') {
-    return (
-      <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-        <button 
-          onClick={() => setView('home')} 
-          style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100, padding: '10px 20px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-          Back to Home
-        </button>
-        <AIHospitalNavigator />
-      </div>
-    );
-  }
 
   if (token && user && view === 'dashboard') {
-    const dashboardProps = { user, activeTab, setActiveTab, logout, goToHome: () => setView('home'), goToMap: () => setView('map') };
+    const dashboardProps = { user, activeTab, setActiveTab, logout, goToHome: () => setView('home') };
     switch (user.role) {
       case 'admin':
         return <AdminDashboard {...dashboardProps} stats={stats} appointments={appointments} bills={bills} fetchAdminBills={fetchAdminBills} token={token} />;
@@ -210,7 +197,6 @@ function App() {
         }
       }}
       onDashboardClick={() => setView('dashboard')} 
-      onMapClick={() => setView('map')}
     />
   );
 }

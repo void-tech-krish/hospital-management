@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Footer from './Footer';
 import axios from 'axios';
 
-const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goToMap, doctors, bookAppointment, appointments }) => {
+const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doctors, bookAppointment, appointments }) => {
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
@@ -189,8 +189,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, goT
           <li className={activeTab === 'Billing' ? 'active' : ''} onClick={() => setActiveTab('Billing')}>Billing & Invoices</li>
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Bed Reservation</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy</li>
-          <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>Profile & Family</li>
-          <li onClick={goToMap} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#3b82f6' }}>📍 Indoor Map</li>
+          <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
       </nav>
