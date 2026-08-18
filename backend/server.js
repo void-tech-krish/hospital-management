@@ -334,6 +334,13 @@ app.get('/api/doctors', verifyToken, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/departments', verifyToken, async (req, res) => {
+  try {
+    const depts = await Department.find();
+    res.json(depts);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- APPOINTMENTS ---
 app.post('/api/appointments', verifyToken, async (req, res) => {
   try {
@@ -368,7 +375,7 @@ app.get('/api/appointments', verifyToken, async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate('patientId', 'name')
-      .populate('doctorId', 'name')
+      .populate('doctorId', 'name department')
       .sort({ date: -1 });
     res.json(appointments);
   } catch(err) { res.status(500).json({ error: err.message }); }

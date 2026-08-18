@@ -29,6 +29,9 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
   const [bedRequests, setBedRequests] = useState([]);
   const [patientBedType, setPatientBedType] = useState('');
 
+  // Departments
+  const [adminDepartments, setAdminDepartments] = useState([]);
+
   // AI Triage
   const [aiMessage, setAiMessage] = useState('');
   const [aiChat, setAiChat] = useState([]);
@@ -57,10 +60,19 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     } catch(err) {}
   };
 
+  const fetchAdminDepartments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/departments', { headers: { Authorization: `Bearer ${token}` } });
+      setAdminDepartments(res.data);
+    } catch(err) {}
+  };
+
   useEffect(() => {
     if (activeTab === 'Billing') fetchBills();
     if (activeTab === 'Messaging') fetchMessages();
     if (activeTab === 'Beds') fetchBedRequests();
+    if (activeTab === 'Departments') fetchAdminDepartments();
   }, [activeTab]);
 
   const handleUpdateProfile = async (e) => {
@@ -183,6 +195,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
         <div className="logo">MediVerse</div>
         <ul className="nav-links">
           <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => setActiveTab('Dashboard')}>Doctor Directory</li>
+          <li className={activeTab === 'Departments' ? 'active' : ''} onClick={() => setActiveTab('Departments')}>Departments</li>
           <li className={activeTab === 'Appointments' ? 'active' : ''} onClick={() => setActiveTab('Appointments')}>Appointments</li>
           <li className={activeTab === 'AI Triage' ? 'active' : ''} onClick={() => setActiveTab('AI Triage')}>AI Triage Assistant</li>
           <li className={activeTab === 'Messaging' ? 'active' : ''} onClick={() => setActiveTab('Messaging')}>Secure Messaging</li>
@@ -230,6 +243,50 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
                 ))}
               </div>
             </div>
+          )}
+
+          {activeTab === 'Departments' && (
+             <div>
+               <div className="header-row">
+                   <h2>Hospital Departments</h2>
+               </div>
+               <div style={{marginTop: '20px'}}>
+                 {adminDepartments.length === 0 && <p>No departments configured.</p>}
+                 {adminDepartments.map(d => {
+                   const deptDoctors = doctors.filter(u => u.department === d.name);
+                   return (
+                     <div key={d._id} className="glass-panel card" style={{marginBottom: '20px'}}>
+                       <div style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                         <h3 style={{margin: '0', fontSize: '20px', color: '#0f172a'}}>{d.name}</h3>
+                          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                            <span style={{background: '#e2e8f0', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', color: '#334155'}}>
+                              Head of Department: {d.hodName}
+                            </span>
+                          </div>
+                       </div>
+                       {deptDoctors.length > 0 ? (
+                         <>
+                           <h4 style={{marginBottom: '10px', color: '#475569'}}>Doctors in this department:</h4>
+                           <div style={{display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
+                             {deptDoctors.map(doc => (
+                               <div key={doc._id} style={{padding: '15px', border: '1px solid #e2e8f0', borderRadius: '8px', flex: '1 1 250px', background: '#f8fafc'}}>
+                                   <strong style={{fontSize: '16px', display: 'block', color: '#0f172a'}}>Dr. {doc.name}</strong>
+                                   <p style={{margin: '5px 0 0 0', fontSize: '14px', color: doc.availability === 'On Leave' ? '#ef4444' : '#10b981', fontWeight: '500'}}>{doc.availability}</p>
+                                   <button onClick={() => { setActiveTab('Appointments'); bookAppointment(doc._id); }} className="primary-btn outline-btn" style={{marginTop: '10px', width: '100%', fontSize: '12px', padding: '5px'}}>
+                                     Book Now
+                                   </button>
+                               </div>
+                             ))}
+                           </div>
+                         </>
+                       ) : (
+                         <p style={{color: '#64748b'}}>No doctors currently available in this department.</p>
+                       )}
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
           )}
 
           {activeTab === 'Appointments' && (
@@ -311,7 +368,10 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
                       {displayedAppointments.map(a => (
                         <tr key={a._id} style={{borderBottom: '1px solid var(--border-color)'}}>
                            <td style={{padding: '10px'}}>{a.patientId?.name || 'Unknown'}</td>
-                           <td style={{padding: '10px'}}>Dr. {a.doctorId?.name || 'Unknown'}</td>
+                           <td style={{padding: '10px'}}>
+                             Dr. {a.doctorId?.name || 'Unknown'} 
+                             <span style={{fontSize: '12px', color: '#64748b', display: 'block'}}>{a.doctorId?.department || 'General Medicine'}</span>
+                           </td>
                            <td style={{padding: '10px'}}>{new Date(a.date).toLocaleDateString()}</td>
                            <td style={{padding: '10px'}}>
                              <strong style={{color: a.status === 'Cancelled' ? '#f87171' : 'var(--primary-color)'}}>{a.status}</strong>
