@@ -55,22 +55,8 @@ h6 {
 }
 
 .homepage-wrapper {
-  background-image: url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
   position: relative;
-}
-
-.homepage-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(240, 248, 255, 0.6);
-  z-index: 0;
-  pointer-events: none;
+  min-height: 100vh;
 }
 
 .homepage-wrapper > * {
@@ -690,7 +676,11 @@ tbody td {
 
 .home-hero {
   padding: 0;
-  background: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  background-image: url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   position: relative;
   overflow: hidden;
   min-height: 600px;
