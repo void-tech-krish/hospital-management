@@ -298,7 +298,8 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                    (u.status === 'Approved' || !u.status) && 
                    u.role === role &&
                    (u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) || 
-                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                    (u.uniqueId && u.uniqueId.toLowerCase().includes(userSearchTerm.toLowerCase())))
                  );
 
                  if (filteredUsers.length === 0) return null;
@@ -309,6 +310,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                         <table style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
                             <thead>
                                 <tr style={{background: '#f8fafc'}}>
+                                    <th style={{padding: '10px'}}>ID</th>
                                     <th style={{padding: '10px'}}>Name</th>
                                     <th style={{padding: '10px'}}>Email</th>
                                     <th style={{padding: '10px'}}>Role</th>
@@ -318,6 +320,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                             <tbody>
                                 {filteredUsers.map(u => (
                                    <tr key={u._id} style={{borderBottom: '1px solid #eee'}}>
+                                       <td style={{padding: '10px', fontWeight: '500', color: '#334155'}}>{u.uniqueId || 'N/A'}</td>
                                        <td style={{padding: '10px'}}>{u.role === 'doctor' && !u.name.startsWith('Dr.') ? `Dr. ${u.name}` : u.name}</td>
                                        <td style={{padding: '10px'}}>{u.email}</td>
                                        <td style={{padding: '10px', textTransform: 'capitalize'}}>{u.role}</td>
@@ -337,7 +340,8 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                {usersList.filter(u => 
                    (u.status === 'Approved' || !u.status) && 
                    (u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) || 
-                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                    (u.uniqueId && u.uniqueId.toLowerCase().includes(userSearchTerm.toLowerCase())))
                  ).length === 0 && (
                    <div className="glass-panel card" style={{marginTop: '20px'}}>
                      <p>No users found matching your search.</p>

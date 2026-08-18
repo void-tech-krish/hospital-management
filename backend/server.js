@@ -19,6 +19,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // --- MONGOOSE SCHEMAS ---
 const userSchema = new mongoose.Schema({
+  uniqueId: { type: String, unique: true, sparse: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -164,7 +165,15 @@ app.post('/api/auth/register', async (req, res) => {
     let initialStatus = 'Approved';
     if (role === 'doctor' || role === 'staff') initialStatus = 'Pending';
 
+    let prefix = 'PT';
+    if (role === 'doctor') prefix = 'DR';
+    else if (role === 'staff') prefix = 'ST';
+    else if (role === 'admin') prefix = 'AD';
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const uniqueId = `${prefix}-${randomNum}`;
+
     const user = await User.create({
+      uniqueId,
       name, 
       email: normalizedEmail, 
       password: hashedPassword, 
