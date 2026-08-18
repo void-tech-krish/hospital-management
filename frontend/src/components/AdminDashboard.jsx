@@ -20,6 +20,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const [expenseAmount, setExpenseAmount] = useState('');
   
   const [auditLogs, setAuditLogs] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   
   const [selectedViewDept, setSelectedViewDept] = useState('All');
 
@@ -73,6 +74,13 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     } catch (err) {}
   };
 
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await axios.get('/api/admin/feedback', { headers: { Authorization: `Bearer ${token}` } });
+      setFeedbacks(res.data);
+    } catch (err) {}
+  };
+
   const fetchBedRequests = async () => {
     try {
       const res = await axios.get('/api/bed-requests', { headers: { Authorization: `Bearer ${token}` } });
@@ -90,6 +98,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     if (activeTab === 'Expenses') fetchExpenses();
     if (activeTab === 'Audit Logs') fetchAuditLogs();
     if (activeTab === 'Beds') fetchBedRequests();
+    if (activeTab === 'Feedback') fetchFeedbacks();
   }, [activeTab]);
 
   const handleDeleteUser = async (id) => {
@@ -243,6 +252,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
           <li className={activeTab === 'Audit Logs' ? 'active' : ''} onClick={() => setActiveTab('Audit Logs')}>Audit Logs</li>
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Beds</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy</li>
+          <li className={activeTab === 'Feedback' ? 'active' : ''} onClick={() => setActiveTab('Feedback')}>User Feedback</li>
           <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
@@ -639,6 +649,40 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                             </tr>
                         </tbody>
                     </table>
+                </div>
+             </div>
+          )}
+
+          {activeTab === 'Feedback' && (
+             <div>
+               <div className="header-row">
+                   <h2>User Feedback</h2>
+               </div>
+               <div className="table-container glass-panel" style={{marginTop: '15px'}}>
+                    {feedbacks.length === 0 ? <p>No feedback received yet.</p> : (
+                      <table style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
+                          <thead>
+                              <tr style={{background: '#f8fafc'}}>
+                                  <th style={{padding: '10px'}}>Date</th>
+                                  <th style={{padding: '10px'}}>User</th>
+                                  <th style={{padding: '10px'}}>Role</th>
+                                  <th style={{padding: '10px'}}>Rating</th>
+                                  <th style={{padding: '10px'}}>Message</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {feedbacks.map(f => (
+                                 <tr key={f._id} style={{borderBottom: '1px solid #eee'}}>
+                                     <td style={{padding: '10px'}}>{new Date(f.date).toLocaleDateString()}</td>
+                                     <td style={{padding: '10px'}}>{f.userName}</td>
+                                     <td style={{padding: '10px', textTransform: 'capitalize'}}>{f.userRole}</td>
+                                     <td style={{padding: '10px'}}>{f.rating ? `${f.rating}/5` : 'N/A'}</td>
+                                     <td style={{padding: '10px'}}>{f.message}</td>
+                                 </tr>
+                              ))}
+                          </tbody>
+                      </table>
+                    )}
                 </div>
              </div>
           )}

@@ -120,6 +120,16 @@ const bedRequestSchema = new mongoose.Schema({
 });
 const BedRequest = mongoose.model('BedRequest', bedRequestSchema);
 
+const feedbackSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userName: String,
+  userRole: String,
+  message: String,
+  rating: Number,
+  date: { type: Date, default: Date.now }
+});
+const Feedback = mongoose.model('Feedback', feedbackSchema);
+
 // --- HELPER ---
 const addLog = async (userId, action) => {
   await AuditLog.create({ userId, action });
@@ -258,6 +268,13 @@ app.delete('/api/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/admin/feedback', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const feedback = await Feedback.find().sort({ date: -1 });
+    res.json(feedback);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- MESSAGES ROUTES ---
 app.post('/api/messages', verifyToken, async (req, res) => {
   try {
@@ -317,6 +334,21 @@ app.post('/api/users/dependents', verifyToken, async (req, res) => {
     const userObj = user.toObject();
     delete userObj.password;
     res.json({ message: 'Dependent added', user: userObj });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/feedback', verifyToken, async (req, res) => {
+  try {
+    const { message, rating } = req.body;
+    const feedback = await Feedback.create({
+      userId: req.user._id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      message,
+      rating
+    });
+    await addLog(req.user._id, `Submitted feedback`);
+    res.status(201).json(feedback);
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 

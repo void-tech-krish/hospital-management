@@ -31,6 +31,10 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   const [notifications, setNotifications] = useState(user?.notifications || 'email_all');
   const [signature, setSignature] = useState(user?.signature || '');
 
+  // Feedback States
+  const [feedbackRating, setFeedbackRating] = useState('5');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
@@ -98,6 +102,19 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
     setMessageInput('');
   };
 
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const tokenLocal = localStorage.getItem('token');
+      await axios.post('/api/feedback', { rating: Number(feedbackRating), message: feedbackMessage }, { headers: { Authorization: `Bearer ${tokenLocal}` } });
+      alert('Feedback submitted successfully. Thank you!');
+      setFeedbackMessage('');
+      setFeedbackRating('5');
+    } catch(err) {
+      alert('Error submitting feedback');
+    }
+  };
+
   return (
     <>
     <div className="dashboard-container">
@@ -111,6 +128,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
           <li className={activeTab === 'Messages' ? 'active' : ''} onClick={() => setActiveTab('Messages')}>In-App Messaging</li>
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Bed Availability</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy Stock</li>
+          <li className={activeTab === 'Provide Feedback' ? 'active' : ''} onClick={() => setActiveTab('Provide Feedback')}>Provide Feedback</li>
           <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
@@ -433,6 +451,33 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                         </tbody>
                     </table>
                 </div>
+             </div>
+          )}
+
+          {activeTab === 'Provide Feedback' && (
+             <div>
+               <div className="header-row">
+                   <h2>Provide Feedback</h2>
+               </div>
+               <div className="glass-panel card" style={{marginTop: '15px'}}>
+                   <form onSubmit={handleFeedbackSubmit} style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                       <div>
+                           <label style={{display: 'block', marginBottom: '5px', fontWeight: '500'}}>Rate your experience</label>
+                           <select value={feedbackRating} onChange={e => setFeedbackRating(e.target.value)} required style={{width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)'}}>
+                               <option value="5">5 - Excellent</option>
+                               <option value="4">4 - Good</option>
+                               <option value="3">3 - Average</option>
+                               <option value="2">2 - Poor</option>
+                               <option value="1">1 - Terrible</option>
+                           </select>
+                       </div>
+                       <div>
+                           <label style={{display: 'block', marginBottom: '5px', fontWeight: '500'}}>Your Feedback</label>
+                           <textarea value={feedbackMessage} onChange={e => setFeedbackMessage(e.target.value)} required rows="5" placeholder="Tell us how we can improve..." style={{width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', resize: 'vertical'}}></textarea>
+                       </div>
+                       <button type="submit" className="btn primary-btn" style={{padding: '12px'}}>Submit Feedback</button>
+                   </form>
+               </div>
              </div>
           )}
 
