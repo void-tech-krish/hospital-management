@@ -5,6 +5,20 @@ import Footer from './Footer';
 const StaffDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appointments }) => {
   const [feedbackRating, setFeedbackRating] = useState('5');
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [bedStats, setBedStats] = useState(null);
+
+  React.useEffect(() => {
+    if (activeTab === 'Beds') {
+      const fetchBedStats = async () => {
+        try {
+          const tokenLocal = localStorage.getItem('token');
+          const res = await axios.get('/api/bed-stats', { headers: { Authorization: `Bearer ${tokenLocal}` } });
+          setBedStats(res.data);
+        } catch(err) {}
+      };
+      fetchBedStats();
+    }
+  }, [activeTab]);
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
@@ -98,11 +112,15 @@ const StaffDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appoi
                <div className="stats-grid" style={{marginTop: '15px'}}>
                  <div className="stat-card">
                    <h4>Available Beds</h4>
-                   <p style={{fontSize: '24px', marginTop: '10px'}}>Normal: 15 | AC: 5 | Deluxe: 2</p>
+                   <p style={{fontSize: '24px', marginTop: '10px'}}>
+                     {bedStats ? `Normal: ${bedStats.available.Normal} | AC: ${bedStats.available.AC} | Deluxe: ${bedStats.available.Deluxe}` : 'Loading...'}
+                   </p>
                  </div>
                  <div className="stat-card">
                    <h4>Occupied Beds</h4>
-                   <p style={{fontSize: '24px', marginTop: '10px'}}>Total: 8</p>
+                   <p style={{fontSize: '24px', marginTop: '10px'}}>
+                     {bedStats ? `Total: ${bedStats.totalOccupied}` : 'Loading...'}
+                   </p>
                  </div>
                </div>
              </div>

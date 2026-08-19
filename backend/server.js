@@ -568,6 +568,49 @@ app.get('/api/beds', verifyToken, (req, res) => {
   ]);
 });
 
+app.get('/api/bed-stats', verifyToken, async (req, res) => {
+  try {
+    const capacities = {
+      Normal: 15,
+      AC: 5,
+      Deluxe: 2,
+      'Super Deluxe': 2,
+      Suite: 1
+    };
+    
+    const approvedRequests = await BedRequest.find({ status: 'Approved' });
+    
+    const occupied = {
+      Normal: 0,
+      AC: 0,
+      Deluxe: 0,
+      'Super Deluxe': 0,
+      Suite: 0
+    };
+    
+    approvedRequests.forEach(req => {
+      if (occupied[req.bedType] !== undefined) {
+        occupied[req.bedType]++;
+      }
+    });
+
+    const available = {
+      Normal: Math.max(0, capacities.Normal - occupied.Normal),
+      AC: Math.max(0, capacities.AC - occupied.AC),
+      Deluxe: Math.max(0, capacities.Deluxe - occupied.Deluxe),
+      'Super Deluxe': Math.max(0, capacities['Super Deluxe'] - occupied['Super Deluxe']),
+      Suite: Math.max(0, capacities.Suite - occupied.Suite)
+    };
+
+    const totalOccupied = Object.values(occupied).reduce((a, b) => a + b, 0);
+
+    res.json({ available, occupied, totalOccupied, capacities });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // --- BED REQUESTS ---
 app.post('/api/bed-requests', verifyToken, async (req, res) => {
   try {

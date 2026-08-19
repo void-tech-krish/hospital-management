@@ -25,6 +25,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
   const [selectedViewDept, setSelectedViewDept] = useState('All');
 
   const [bedRequests, setBedRequests] = useState([]);
+  const [bedStats, setBedStats] = useState(null);
   const [userSearchTerm, setUserSearchTerm] = useState('');
 
   const minimalCharge = 50; // Minimal fixed charge
@@ -89,6 +90,13 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     } catch(err) {}
   };
 
+  const fetchBedStats = async () => {
+    try {
+      const res = await axios.get('/api/bed-stats', { headers: { Authorization: `Bearer ${token}` } });
+      setBedStats(res.data);
+    } catch(err) {}
+  };
+
   useEffect(() => {
     if (activeTab === 'Users' || activeTab === 'Pending Approvals' || activeTab === 'Doctor Availability' || activeTab === 'Salaries' || activeTab === 'Departments') {
       fetchUsers();
@@ -98,7 +106,10 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     if (activeTab === 'Grievances') fetchGrievances();
     if (activeTab === 'Expenses') fetchExpenses();
     if (activeTab === 'Audit Logs') fetchAuditLogs();
-    if (activeTab === 'Beds') fetchBedRequests();
+    if (activeTab === 'Beds') {
+      fetchBedRequests();
+      fetchBedStats();
+    }
     if (activeTab === 'Feedback') fetchFeedbacks();
   }, [activeTab]);
 
@@ -229,6 +240,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
     try {
       await axios.put(`/api/bed-requests/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
       fetchBedRequests();
+      fetchBedStats();
     } catch(err) {
       alert('Error updating status');
     }
@@ -583,11 +595,15 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                <div className="stats-grid" style={{marginTop: '15px'}}>
                  <div className="stat-card">
                    <h4>Available Beds</h4>
-                   <p style={{fontSize: '24px', marginTop: '10px'}}>Normal: 15 | AC: 5 | Deluxe: 2</p>
+                   <p style={{fontSize: '24px', marginTop: '10px'}}>
+                     {bedStats ? `Normal: ${bedStats.available.Normal} | AC: ${bedStats.available.AC} | Deluxe: ${bedStats.available.Deluxe}` : 'Loading...'}
+                   </p>
                  </div>
                  <div className="stat-card">
                    <h4>Occupied Beds</h4>
-                   <p style={{fontSize: '24px', marginTop: '10px'}}>Total: 8</p>
+                   <p style={{fontSize: '24px', marginTop: '10px'}}>
+                     {bedStats ? `Total: ${bedStats.totalOccupied}` : 'Loading...'}
+                   </p>
                  </div>
                </div>
 
@@ -601,6 +617,7 @@ const AdminDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, stats
                      await axios.post('/api/bed-requests', { bedType: btype, patientId: pid, patientName: pid }, { headers: { Authorization: `Bearer ${token}` } });
                      alert('Bed assigned successfully!');
                      fetchBedRequests();
+                     fetchBedStats();
                      e.target.reset();
                    } catch(err) { alert('Error assigning bed'); }
                  }}>
