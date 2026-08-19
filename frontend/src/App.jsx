@@ -22,6 +22,7 @@ function App() {
   const [certificateUrl, setCertificateUrl] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [showAuth, setShowAuth] = useState(false);
   const [intentToBook, setIntentToBook] = useState(false); // Track if user clicked "Book Appointment"
@@ -71,6 +72,7 @@ function App() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setIsLoading(true);
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const cleanEmail = email.trim();
@@ -91,6 +93,8 @@ function App() {
       }
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Authentication failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,7 +154,9 @@ function App() {
               </div>
             )}
             
-            <button type="submit" className="primary-btn">{isLogin ? 'Login' : 'Register'}</button>
+            <button type="submit" className="primary-btn" disabled={isLoading}>
+              {isLoading ? 'Please wait...' : (isLogin ? 'Login' : 'Register')}
+            </button>
           </form>
           <p onClick={() => { setIsLogin(!isLogin); setErrorMsg(''); }} className="toggle-auth">
             {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
