@@ -55,6 +55,14 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   // Messages States
   const [messageInput, setMessageInput] = useState('');
   const [messages, setMessages] = useState([]);
+  const [messageRecipient, setMessageRecipient] = useState('');
+
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get('/api/messages', { headers: { Authorization: `Bearer ${token}` } });
+      setMessages(res.data);
+    } catch(err) {}
+  };
 
   const updateAvailability = async () => {
     try {
@@ -76,6 +84,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
 
   React.useEffect(() => {
     if (activeTab === 'Beds') fetchBedRequests();
+    if (activeTab === 'Messages') fetchMessages();
   }, [activeTab]);
 
   const updateBedRequestStatus = async (id, status) => {
@@ -96,10 +105,18 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
     setChatInput('');
   };
 
-  const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
-    setMessages([...messages, { sender: `Dr. ${user?.name || 'Doctor'}`, text: messageInput, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }]);
-    setMessageInput('');
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !messageRecipient) {
+        alert("Please select a recipient and enter a message.");
+        return;
+    }
+    try {
+        await axios.post('/api/messages', { receiverId: messageRecipient, text: messageInput }, { headers: { Authorization: `Bearer ${token}` } });
+        setMessageInput('');
+        fetchMessages();
+    } catch(err) {
+        alert('Error sending message');
+    }
   };
 
   const handleFeedbackSubmit = async (e) => {
@@ -344,18 +361,28 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                </div>
                <div className="glass-panel card" style={{display: 'flex', flexDirection: 'column', height: '500px', marginTop: '15px'}}>
                  <div style={{flex: 1, overflowY: 'auto', marginBottom: '10px', padding: '15px', background: '#f8fafc', borderRadius: '5px', border: '1px solid #e2e8f0'}}>
-                    {messages.map((msg, i) => (
-                      <div key={i} style={{marginBottom: '10px', padding: '12px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'}}>
-                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
-                           <strong style={{color: '#0f172a'}}>{msg.sender}</strong> 
-                           <span style={{fontSize: '12px', color: '#94a3b8'}}>{msg.time}</span>
+                    {messages.length === 0 && <p style={{textAlign: 'center', color: '#64748b'}}>No messages found.</p>}
+                    {messages.map((msg, i) => {
+                      const isMine = msg.senderId === user?._id;
+                      return (
+                        <div key={i} style={{marginBottom: '10px', padding: '12px', background: isMine ? '#e0f2fe' : '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', textAlign: isMine ? 'right' : 'left'}}>
+                          <div style={{display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: '5px', gap: '10px'}}>
+                             <strong style={{color: '#0f172a'}}>{isMine ? 'You' : msg.senderName}</strong> 
+                             <span style={{fontSize: '12px', color: '#94a3b8'}}>{new Date(msg.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          </div>
+                          <p style={{margin: '0', color: '#334155'}}>{msg.text}</p>
                         </div>
-                        <p style={{margin: '0', color: '#334155'}}>{msg.text}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                  </div>
                  <div style={{display: 'flex', gap: '10px'}}>
-                    <input type="text" placeholder="Type a message to other specialists, staff, or patients..." value={messageInput} onChange={e => setMessageInput(e.target.value)} style={{flex: 1, padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1'}} onKeyDown={e => { if(e.key === 'Enter') handleSendMessage(); }} />
+                    <select value={messageRecipient} onChange={e => setMessageRecipient(e.target.value)} style={{padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1', width: '200px'}}>
+                        <option value="" disabled>Select Recipient</option>
+                        {[...new Map(messages.filter(m => m.senderId !== user?._id).map(m => [m.senderId, m.senderName])).entries()].map(([id, name]) => (
+                            <option key={id} value={id}>{name}</option>
+                        ))}
+                    </select>
+                    <input type="text" placeholder="Type a message to reply..." value={messageInput} onChange={e => setMessageInput(e.target.value)} style={{flex: 1, padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1'}} onKeyDown={e => { if(e.key === 'Enter') handleSendMessage(); }} />
                     <button className="btn primary-btn" style={{padding: '0 25px'}} onClick={handleSendMessage}>Send</button>
                  </div>
                </div>
