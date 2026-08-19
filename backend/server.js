@@ -4,6 +4,8 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const { GoogleGenAI } = require('@google/genai');
+const { PATIENT_SYSTEM_PROMPT } = require('./prompts');
 
 const app = express();
 app.use(cors());
@@ -702,6 +704,47 @@ const seedAdmin = async () => {
   } catch(err) { console.error('Seeding error:', err); }
 };
 seedAdmin();
+
+// --- AI ASSISTANT ROUTES ---
+app.post('/api/ai/patient-chat', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'patient') return res.status(403).json({ error: 'Patients only' });
+    
+    const { history, message } = req.body; 
+    
+    const patientAppointments = await Appointment.find({ patientId: req.user._id }).populate('doctorId', 'name department');
+    const patientProfile = await User.findById(req.user._id);
+    
+    let contextData = `
+Patient Name: ${patientProfile.name}
+Gender: ${patientProfile.gender || 'Not specified'}
+Contact: ${patientProfile.contact || 'Not specified'}
+Upcoming/Past Appointments:
+${patientAppointments.length > 0 ? patientAppointments.map(a => `- Date: ${new Date(a.date).toLocaleDateString()}, Doctor: ${a.doctorId?.name} (${a.doctorId?.department}), Status: ${a.status}`).join('\n') : 'No appointments.'}
+    `;
+    
+    const systemPrompt = PATIENT_SYSTEM_PROMPT.replace('{{PATIENT_CONTEXT}}', contextData);
+    
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    
+    const formattedHistory = history ? history.map(msg => ({
+       role: msg.sender === 'Patient' ? 'user' : 'model',
+       parts: [{ text: msg.text }]
+    })) : [];
+    
+    const chat = ai.chats.create({
+       model: 'gemini-2.5-flash',
+       config: { systemInstruction: systemPrompt },
+       history: formattedHistory
+    });
+    
+    const response = await chat.sendMessage({ message });
+    res.json({ reply: response.text });
+  } catch (err) {
+    console.error('AI Error:', err);
+    res.status(500).json({ error: 'Failed to process AI request. Check API key.' });
+  }
+});
 
 const seedDepartments = async () => {
   try {

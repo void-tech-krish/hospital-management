@@ -35,6 +35,7 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
   // AI Triage
   const [aiMessage, setAiMessage] = useState('');
   const [aiChat, setAiChat] = useState([]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // Feedback
   const [feedbackRating, setFeedbackRating] = useState('5');
@@ -126,24 +127,25 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
     } catch(e) { alert('Error rescheduling'); }
   };
 
-  const handleAiSubmit = (e) => {
+  const handleAiSubmit = async (e) => {
     e.preventDefault();
     if (!aiMessage.trim()) return;
     
-    setAiChat(prev => [...prev, { sender: 'Patient', text: aiMessage }]);
-    const lowerMsg = aiMessage.toLowerCase();
-    let aiResponse = "Based on your symptoms, I recommend seeing a General Physician. You can book an appointment in the Appointments tab.";
-    
-    if (lowerMsg.includes('chest pain') || lowerMsg.includes('bleeding') || lowerMsg.includes('stroke') || lowerMsg.includes('breath')) {
-        aiResponse = "🚨 CRITICAL ALERT: Your symptoms indicate a potential medical emergency! Please call Emergency Services (e.g. 911) immediately or proceed to the nearest ER. Do not wait for a standard booking.";
-    } else if (lowerMsg.includes('headache') || lowerMsg.includes('vision') || lowerMsg.includes('migraine')) {
-        aiResponse = "I recommend booking an appointment with the Neurology department. I've highlighted this in your booking options.";
-    } else if (lowerMsg.includes('bone') || lowerMsg.includes('joint') || lowerMsg.includes('pain')) {
-        aiResponse = "I recommend consulting the Orthopedics department. You can book an appointment from the dashboard.";
-    }
-    
-    setTimeout(() => setAiChat(prev => [...prev, { sender: 'AI', text: aiResponse }]), 1000);
+    const currentMessage = aiMessage;
+    const currentHistory = [...aiChat];
+    setAiChat(prev => [...prev, { sender: 'Patient', text: currentMessage }]);
     setAiMessage('');
+    setIsAiLoading(true);
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await axios.post('/api/ai/patient-chat', { history: currentHistory, message: currentMessage }, { headers: { Authorization: `Bearer ${token}` } });
+        setAiChat(prev => [...prev, { sender: 'AI', text: res.data.reply }]);
+    } catch (err) {
+        setAiChat(prev => [...prev, { sender: 'AI', text: "Error: I'm currently unable to process your request. Please try again later or contact support." }]);
+    } finally {
+        setIsAiLoading(false);
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -429,10 +431,10 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
                         </div>
                       ))}
                    </div>
-                   <form onSubmit={handleAiSubmit} style={{display: 'flex', gap: '10px'}}>
-                      <input type="text" value={aiMessage} onChange={e => setAiMessage(e.target.value)} placeholder="Describe your symptoms (e.g. 'I have a severe headache...')" style={{flexGrow: 1, padding: '15px'}} />
-                      <button type="submit" className="btn primary-btn">Analyze Symptoms</button>
-                   </form>
+                     <form onSubmit={handleAiSubmit} style={{display: 'flex', gap: '10px'}}>
+                        <input type="text" value={aiMessage} onChange={e => setAiMessage(e.target.value)} placeholder="Ask anything... (e.g. 'When is my next appointment?')" style={{flexGrow: 1, padding: '15px'}} disabled={isAiLoading} />
+                        <button type="submit" className="btn primary-btn" disabled={isAiLoading}>{isAiLoading ? 'Thinking...' : 'Ask AI'}</button>
+                     </form>
                </div>
              </div>
           )}
