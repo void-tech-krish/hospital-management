@@ -74,6 +74,14 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   };
 
   const [bedRequests, setBedRequests] = useState([]);
+  const [salaries, setSalaries] = useState([]);
+  
+  const fetchSalaries = async () => {
+    try {
+      const res = await axios.get('/api/salaries/me', { headers: { Authorization: `Bearer ${token}` } });
+      setSalaries(res.data);
+    } catch(err) {}
+  };
   
   const fetchBedRequests = async () => {
     try {
@@ -85,6 +93,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   React.useEffect(() => {
     if (activeTab === 'Beds') fetchBedRequests();
     if (activeTab === 'Messages') fetchMessages();
+    if (activeTab === 'My Salary') fetchSalaries();
   }, [activeTab]);
 
   const updateBedRequestStatus = async (id, status) => {
@@ -146,6 +155,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
           <li className={activeTab === 'Beds' ? 'active' : ''} onClick={() => setActiveTab('Beds')}>Bed Availability</li>
           <li className={activeTab === 'Pharmacy' ? 'active' : ''} onClick={() => setActiveTab('Pharmacy')}>Pharmacy Stock</li>
           <li className={activeTab === 'Provide Feedback' ? 'active' : ''} onClick={() => setActiveTab('Provide Feedback')}>Provide Feedback</li>
+          <li className={activeTab === 'My Salary' ? 'active' : ''} onClick={() => setActiveTab('My Salary')}>My Salary</li>
           <li className={activeTab === 'My Profile' ? 'active' : ''} onClick={() => setActiveTab('My Profile')}>My Profile</li>
         </ul>
         <button onClick={logout} className="logout-btn">Logout</button>
@@ -599,6 +609,41 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                </form>
              </div>
           )}
+
+          {activeTab === 'My Salary' && (
+             <div>
+               <div className="header-row">
+                   <h2>My Salary History</h2>
+               </div>
+               <div className="table-container glass-panel">
+                 <h3>Salary Slips</h3>
+                 <div style={{marginTop: '20px'}}>
+                   {salaries.length === 0 ? <p>No salary records found.</p> : (
+                     <table style={{width: '100%', borderCollapse: 'collapse', marginTop: '10px'}}>
+                       <thead>
+                         <tr style={{background: '#f8fafc', textAlign: 'left'}}>
+                             <th style={{padding: '10px'}}>Month</th>
+                             <th style={{padding: '10px'}}>Date Issued</th>
+                             <th style={{padding: '10px'}}>Amount</th>
+                             <th style={{padding: '10px'}}>Status</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         {salaries.map((sal, i) => (
+                           <tr key={i} style={{borderTop: '1px solid #e2e8f0'}}>
+                               <td style={{padding: '10px'}}>{sal.month}</td>
+                               <td style={{padding: '10px'}}>{new Date(sal.date).toLocaleDateString()}</td>
+                               <td style={{padding: '10px', fontWeight: 'bold', color: '#10b981'}}>${sal.amount}</td>
+                               <td style={{padding: '10px'}}><span className="status-badge" style={{background: '#dcfce7', color: '#166534'}}>{sal.status}</span></td>
+                           </tr>
+                         ))}
+                       </tbody>
+                     </table>
+                   )}
+                 </div>
+               </div>
+             </div>
+           )}
         </section>
       </main>
     </div>

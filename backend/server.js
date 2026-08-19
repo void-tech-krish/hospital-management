@@ -465,6 +465,13 @@ app.get('/api/bills', verifyToken, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/salaries/me', verifyToken, async (req, res) => {
+  try {
+    const mySalaries = await Salary.find({ userId: req.user._id }).sort({ date: -1 });
+    res.json(mySalaries);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/bills/:id/pay', verifyToken, async (req, res) => {
   try {
     const bill = await Bill.findById(req.params.id);
