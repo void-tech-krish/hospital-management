@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { GoogleGenAI } = require('@google/genai');
-const { PATIENT_SYSTEM_PROMPT } = require('./prompts');
+const { PATIENT_SYSTEM_PROMPT, DOCTOR_SYSTEM_PROMPT } = require('./prompts');
 
 const app = express();
 app.use(cors());
@@ -729,6 +729,41 @@ ${patientAppointments.length > 0 ? patientAppointments.map(a => `- Date: ${new D
     
     const formattedHistory = history ? history.map(msg => ({
        role: msg.sender === 'Patient' ? 'user' : 'model',
+       parts: [{ text: msg.text }]
+    })) : [];
+    
+    const chat = ai.chats.create({
+       model: 'gemini-2.5-flash',
+       config: { systemInstruction: systemPrompt },
+       history: formattedHistory
+    });
+    
+    const response = await chat.sendMessage({ message });
+    res.json({ reply: response.text });
+  } catch (err) {
+    console.error('AI Error:', err);
+    res.status(500).json({ error: 'Failed to process AI request. Check API key.' });
+  }
+});
+
+app.post('/api/ai/doctor-chat', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'doctor') return res.status(403).json({ error: 'Doctors only' });
+    
+    const { history, message } = req.body; 
+    const doctorProfile = await User.findById(req.user._id);
+    
+    let contextData = `
+Doctor Name: Dr. ${doctorProfile.name}
+Specialization: ${doctorProfile.specialization || 'Not specified'}
+Department: ${doctorProfile.department || 'Not specified'}
+    `;
+    
+    const systemPrompt = DOCTOR_SYSTEM_PROMPT.replace('{{DOCTOR_CONTEXT}}', contextData);
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    
+    const formattedHistory = history ? history.map(msg => ({
+       role: msg.role === 'user' ? 'user' : 'model',
        parts: [{ text: msg.text }]
     })) : [];
     

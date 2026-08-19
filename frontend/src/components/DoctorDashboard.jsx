@@ -19,6 +19,7 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
   const [chatHistory, setChatHistory] = useState([
     { role: 'ai', text: 'Hello Doctor. How can I assist you with medical guidelines, drug interactions, or historical case files today?' }
   ]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // Profile States
   const [profileName, setProfileName] = useState(user?.name || '');
@@ -105,13 +106,24 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
     }
   };
 
-  const handleAiAsk = () => {
+  const handleAiAsk = async () => {
     if (!chatInput.trim()) return;
-    setChatHistory([...chatHistory, 
-      { role: 'user', text: chatInput }, 
-      { role: 'ai', text: 'Analyzing medical databases... (AI Response: Based on standard guidelines, there are no severe contraindications for this query. Please verify with clinical context.)' }
-    ]);
+    const currentInput = chatInput;
+    const currentHistory = [...chatHistory];
+    
+    setChatHistory(prev => [...prev, { role: 'user', text: currentInput }]);
     setChatInput('');
+    setIsAiLoading(true);
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await axios.post('/api/ai/doctor-chat', { history: currentHistory, message: currentInput }, { headers: { Authorization: `Bearer ${token}` } });
+        setChatHistory(prev => [...prev, { role: 'ai', text: res.data.reply }]);
+    } catch (err) {
+        setChatHistory(prev => [...prev, { role: 'ai', text: 'Error connecting to Clinical AI. Please try again.' }]);
+    } finally {
+        setIsAiLoading(false);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -357,9 +369,9 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                     ))}
                  </div>
                  <div style={{display: 'flex', gap: '10px'}}>
-                    <input type="text" placeholder="Query complex guidelines, drug interactions, or historical cases..." value={chatInput} onChange={e => setChatInput(e.target.value)} style={{flex: 1, padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1'}} onKeyDown={e => { if(e.key === 'Enter') handleAiAsk(); }} />
-                    <button className="btn primary-btn" style={{padding: '0 25px'}} onClick={handleAiAsk}>Ask AI</button>
-                 </div>
+                     <input type="text" placeholder="Query complex guidelines, drug interactions, or historical cases..." value={chatInput} onChange={e => setChatInput(e.target.value)} style={{flex: 1, padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1'}} onKeyDown={e => { if(e.key === 'Enter') handleAiAsk(); }} disabled={isAiLoading} />
+                     <button className="btn primary-btn" style={{padding: '0 25px'}} onClick={handleAiAsk} disabled={isAiLoading}>{isAiLoading ? 'Analyzing...' : 'Ask AI'}</button>
+                   </div>
                </div>
              </div>
           )}
