@@ -383,19 +383,22 @@ const DoctorDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, appo
                </div>
                <div className="glass-panel card" style={{display: 'flex', flexDirection: 'column', height: '500px', marginTop: '15px'}}>
                  <div style={{flex: 1, overflowY: 'auto', marginBottom: '10px', padding: '15px', background: '#f8fafc', borderRadius: '5px', border: '1px solid #e2e8f0'}}>
-                    {messages.length === 0 && <p style={{textAlign: 'center', color: '#64748b'}}>No messages found.</p>}
-                    {messages.map((msg, i) => {
-                      const isMine = msg.senderId === user?._id;
-                      return (
-                        <div key={i} style={{marginBottom: '10px', padding: '12px', background: isMine ? '#e0f2fe' : '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', textAlign: isMine ? 'right' : 'left'}}>
-                          <div style={{display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: '5px', gap: '10px'}}>
-                             <strong style={{color: '#0f172a'}}>{isMine ? 'You' : msg.senderName}</strong> 
-                             <span style={{fontSize: '12px', color: '#94a3b8'}}>{new Date(msg.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                          </div>
-                          <p style={{margin: '0', color: '#334155'}}>{msg.text}</p>
-                        </div>
-                      );
-                    })}
+                     {!messageRecipient ? (
+                         <p style={{textAlign: 'center', color: '#64748b'}}>Please select a recipient to view conversation.</p>
+                     ) : messages.filter(m => m.senderId === messageRecipient || m.receiverId === messageRecipient).length === 0 ? (
+                         <p style={{textAlign: 'center', color: '#64748b'}}>No messages found.</p>
+                     ) : messages.filter(m => m.senderId === messageRecipient || m.receiverId === messageRecipient).map((msg, i) => {
+                       const isMine = msg.senderId === user?._id;
+                       return (
+                         <div key={i} style={{marginBottom: '10px', padding: '12px', background: isMine ? '#e0f2fe' : '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', textAlign: isMine ? 'right' : 'left'}}>
+                           <div style={{display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: '5px', gap: '10px'}}>
+                              <strong style={{color: '#0f172a'}}>{isMine ? 'You' : msg.senderName}</strong> 
+                              <span style={{fontSize: '12px', color: '#94a3b8'}}>{new Date(msg.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                           </div>
+                           <p style={{margin: '0', color: '#334155'}}>{msg.text}</p>
+                         </div>
+                       );
+                     })}
                  </div>
                  <div style={{display: 'flex', gap: '10px'}}>
                     <select value={messageRecipient} onChange={e => setMessageRecipient(e.target.value)} style={{padding: '12px', borderRadius: '5px', border: '1px solid #cbd5e1', width: '200px'}}>

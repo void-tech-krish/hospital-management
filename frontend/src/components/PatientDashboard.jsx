@@ -446,8 +446,11 @@ const PatientDashboard = ({ user, activeTab, setActiveTab, logout, goToHome, doc
                </div>
                <div className="glass-panel card" style={{flexGrow: 1, display: 'flex', flexDirection: 'column', height: '400px'}}>
                    <div style={{flexGrow: 1, overflowY: 'auto', padding: '15px', background: 'rgba(0,0,0,0.1)', borderRadius: '4px', marginBottom: '15px'}}>
-                      {messages.length === 0 && <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No messages yet.</p>}
-                      {messages.map((msg, i) => {
+                      {!messageDoctor ? (
+                          <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>Please select a doctor to view conversation.</p>
+                      ) : messages.filter(m => m.senderId === messageDoctor || m.receiverId === messageDoctor).length === 0 ? (
+                          <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No messages yet.</p>
+                      ) : messages.filter(m => m.senderId === messageDoctor || m.receiverId === messageDoctor).map((msg, i) => {
                         const isMine = msg.senderId === user?._id;
                         return (
                           <div key={i} style={{marginBottom: '15px', textAlign: isMine ? 'right' : 'left'}}>
